@@ -1,3 +1,77 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Sunrise School Color Scheme */
+:root {
+  --sunrise-orange: #FF6B35;
+  --sunrise-blue: #1E3A8A;
+  --sunrise-green: #10B981;
+  --sunrise-yellow: #F59E0B;
+  --sunrise-coral: #FF8A80;
+  --sunrise-teal: #14B8A6;
+  --sunrise-purple: #8B5CF6;
+  --sunrise-warm-gray: #F3F4F6;
+}
+
+/* Custom curved sections */
+.curved-section {
+  position: relative;
+}
+
+.curved-section::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: inherit;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  z-index: -1;
+}
+
+.curved-section::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: inherit;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  z-index: -1;
+}
+
+/* Smooth animations */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient backgrounds */
+.gradient-sunrise {
+  background: linear-gradient(135deg, var(--sunrise-orange) 0%, var(--sunrise-coral) 100%);
+}
+
+.gradient-ocean {
+  background: linear-gradient(135deg, var(--sunrise-blue) 0%, var(--sunrise-teal) 100%);
+}
+
+.gradient-nature {
+  background: linear-gradient(135deg, var(--sunrise-green) 0%, var(--sunrise-yellow) 100%);
+}
