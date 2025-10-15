@@ -118,6 +118,14 @@ export default async function AdminLayout({
                     Audit Logs
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/admin/homepage"
+                    className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition"
+                  >
+                    Homepage
+                  </Link>
+                </li>
               </ul>
             </nav>
           </aside>
