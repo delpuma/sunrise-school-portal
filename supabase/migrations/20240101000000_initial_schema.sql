@@ -142,6 +142,23 @@ CREATE TABLE newsletter_signups (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- CRM contacts table
+CREATE TABLE crm_contacts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT UNIQUE NOT NULL,
+  first_name TEXT,
+  last_name TEXT,
+  phone TEXT,
+  status TEXT NOT NULL CHECK (status IN ('lead', 'prospect', 'enrolled', 'alumni')),
+  source TEXT,
+  grade_interest TEXT,
+  engagement_score INTEGER DEFAULT 0,
+  tags TEXT[] DEFAULT '{}',
+  opted_out BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Forms table
 CREATE TABLE forms (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -162,23 +179,6 @@ CREATE TABLE form_submissions (
   data JSONB NOT NULL,
   contact_id UUID REFERENCES crm_contacts(id),
   submitted_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- CRM contacts table
-CREATE TABLE crm_contacts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email TEXT UNIQUE NOT NULL,
-  first_name TEXT,
-  last_name TEXT,
-  phone TEXT,
-  status TEXT NOT NULL CHECK (status IN ('lead', 'prospect', 'enrolled', 'alumni')),
-  source TEXT,
-  grade_interest TEXT,
-  engagement_score INTEGER DEFAULT 0,
-  tags TEXT[] DEFAULT '{}',
-  opted_out BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- CRM interactions table
