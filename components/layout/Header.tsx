@@ -19,13 +19,13 @@ export default function Header() {
             .from('users')
             .select('role')
             .eq('id', user.id)
-            .single()
+            .limit(1)
           
           if (error) {
             console.error('User role query error:', { errorCode: error.code, message: error.message })
             setUserRole(null)
           } else {
-            setUserRole(data?.role || null)
+            setUserRole(data?.[0]?.role || null)
           }
         } catch (error: any) {
           console.error('User role fetch error:', { message: error?.message || 'Unknown error' })
