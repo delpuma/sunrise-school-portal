@@ -3,8 +3,13 @@
 
 const { createClient } = require('@supabase/supabase-js')
 
-const supabaseUrl = 'https://wccscudunmwyyfsyassl.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjY3NjdWR1bm13eXlmc3lhc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NjgxMTksImV4cCI6MjA3NjA0NDExOX0.knQ6X-9dMyCzsu4XbFr1JguP4kqnP_2ova4MF8bdTr0'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -43,8 +48,8 @@ async function verifyAdminUser() {
     
     // Try to sign in
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: 'ryan@delpuma.com',
-      password: 'Delpuma202$$!',
+      email: process.env.ADMIN_EMAIL || 'admin@example.com',
+      password: process.env.ADMIN_PASSWORD || 'change-me',
     })
 
     if (error) {

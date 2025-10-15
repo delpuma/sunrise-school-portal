@@ -15,8 +15,8 @@ export default function TestAuthPage() {
     try {
       // First, sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: 'ryan@delpuma.com',
-        password: 'Delpuma202$$!',
+        email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
+        password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'change-me',
       })
 
       if (authError) {
@@ -30,7 +30,7 @@ export default function TestAuthPage() {
           .from('users')
           .insert({
             id: authData.user.id,
-            email: 'ryan@delpuma.com',
+            email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
             name: 'Ryan Morales',
             role: 'admin',
           })
@@ -40,7 +40,7 @@ export default function TestAuthPage() {
           return
         }
 
-        setResult(`✅ Admin user created successfully!\nUser ID: ${authData.user.id}\nEmail: ryan@delpuma.com\nRole: admin`)
+        setResult(`✅ Admin user created successfully!\nUser ID: ${authData.user.id}\nEmail: ${process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com'}\nRole: admin`)
       }
     } catch (error: any) {
       setResult(`Error: ${error.message}`)
@@ -55,8 +55,8 @@ export default function TestAuthPage() {
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'ryan@delpuma.com',
-        password: 'Delpuma202$$!',
+        email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
+        password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'change-me',
       })
 
       if (error) {

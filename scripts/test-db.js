@@ -3,8 +3,13 @@
 
 const { createClient } = require('@supabase/supabase-js')
 
-const supabaseUrl = 'https://wccscudunmwyyfsyassl.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjY3NjdWR1bm13eXlmc3lhc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NjgxMTksImV4cCI6MjA3NjA0NDExOX0.knQ6X-9dMyCzsu4XbFr1JguP4kqnP_2ova4MF8bdTr0'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -37,8 +42,8 @@ async function createAdminUser() {
     
     // Sign up the user
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: 'ryan@delpuma.com',
-      password: 'Delpuma202$$!',
+      email: process.env.ADMIN_EMAIL || 'admin@example.com',
+      password: process.env.ADMIN_PASSWORD || 'change-me',
     })
 
     if (authError) {
@@ -46,8 +51,8 @@ async function createAdminUser() {
         console.log('User already exists, trying to sign in...')
         
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: 'ryan@delpuma.com',
-          password: 'Delpuma202$$!',
+          email: process.env.ADMIN_EMAIL || 'admin@example.com',
+          password: process.env.ADMIN_PASSWORD || 'change-me',
         })
         
         if (signInError) {
@@ -62,7 +67,7 @@ async function createAdminUser() {
           .from('users')
           .upsert({
             id: signInData.user.id,
-            email: 'ryan@delpuma.com',
+            email: process.env.ADMIN_EMAIL || 'admin@example.com',
             name: 'Ryan Morales',
             role: 'admin',
           })
@@ -88,7 +93,7 @@ async function createAdminUser() {
         .from('users')
         .insert({
           id: authData.user.id,
-          email: 'ryan@delpuma.com',
+          email: process.env.ADMIN_EMAIL || 'admin@example.com',
           name: 'Ryan Morales',
           role: 'admin',
         })
@@ -99,8 +104,8 @@ async function createAdminUser() {
       }
 
       console.log('✅ Admin user created successfully!')
-      console.log('Email: ryan@delpuma.com')
-      console.log('Password: Delpuma202$$!')
+      console.log('Email:', process.env.ADMIN_EMAIL || 'admin@example.com')
+      console.log('Password: [REDACTED]')
       console.log('Role: admin')
     }
   } catch (error) {
