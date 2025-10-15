@@ -23,9 +23,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      setLoading(false)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+      } catch (error: any) {
+        console.error('Auth error:', { message: error?.message || 'Unknown error' })
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
     }
 
     getUser()
@@ -41,8 +47,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
+    try {
+      await supabase.auth.signOut()
+      setUser(null)
+    } catch (error: any) {
+      console.error('Sign out error:', { message: error?.message || 'Unknown error' })
+    }
   }
 
   return (

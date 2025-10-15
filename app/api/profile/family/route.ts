@@ -29,7 +29,8 @@ export async function PUT(request: NextRequest) {
     .eq('id', family.id)
   
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Family update error:', { errorCode: error.code, message: error.message });
+    return NextResponse.json({ error: 'Failed to update family profile' }, { status: 500 })
   }
   
   // Create audit log

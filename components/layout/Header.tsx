@@ -2,11 +2,42 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function Header() {
   const { user, signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const supabase = useMemo(() => createClient(), [])
+
+  useEffect(() => {
+    if (user) {
+      const fetchUserRole = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+          
+          if (error) {
+            console.error('User role query error:', { errorCode: error.code, message: error.message })
+            setUserRole(null)
+          } else {
+            setUserRole(data?.role || null)
+          }
+        } catch (error: any) {
+          console.error('User role fetch error:', { message: error?.message || 'Unknown error' })
+          setUserRole(null)
+        }
+      }
+      
+      fetchUserRole()
+    } else {
+      setUserRole(null)
+    }
+  }, [user, supabase])
 
   return (
     <header className="bg-white shadow-sm">
@@ -60,14 +91,23 @@ export default function Header() {
             </Link>
             {user ? (
               <>
-                <Link
-                  href="/portal/dashboard"
-                  className="text-sm font-medium text-gray-900 hover:text-blue-600"
-                >
-                  Portal
-                </Link>
+                {userRole === 'admin' || userRole === 'staff' ? (
+                  <Link
+                    href="/admin/dashboard"
+                    className="text-sm font-medium text-gray-900 hover:text-blue-600"
+                  >
+                    Admin
+                  </Link>
+                ) : (
+                  <Link
+                    href="/portal/dashboard"
+                    className="text-sm font-medium text-gray-900 hover:text-blue-600"
+                  >
+                    Portal
+                  </Link>
+                )}
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => signOut().catch(console.error)}
                   className="text-sm font-medium text-gray-900 hover:text-blue-600"
                 >
                   Sign Out

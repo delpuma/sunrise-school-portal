@@ -16,7 +16,7 @@ export default async function AdminResourcesPage() {
     }
     acc[resource.category].push(resource)
     return acc
-  }, {} as Record<string, typeof resources>)
+  }, {} as Record<string, any[]>)
 
   return (
     <div>
@@ -36,7 +36,7 @@ export default async function AdminResourcesPage() {
             <div key={category} className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4">{category}</h2>
               <div className="space-y-3">
-                {items.map((resource) => (
+                {(items as any[]).map((resource: any) => (
                   <div
                     key={resource.id}
                     className="flex items-center justify-between border-b pb-3"

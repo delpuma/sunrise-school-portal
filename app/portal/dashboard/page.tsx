@@ -2,39 +2,57 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
 export default async function PortalDashboard() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) return null
-  
-  // Get user's family
-  const { data: family } = await supabase
-    .from('families')
-    .select('*')
-    .or(`primary_user_id.eq.${user.id},secondary_user_id.eq.${user.id}`)
-    .single()
-  
-  // Get recent invoices
-  const { data: invoices } = await supabase
-    .from('invoices')
-    .select('*')
-    .eq('family_id', family?.id)
-    .order('created_at', { ascending: false })
-    .limit(3)
-  
-  // Get recent registrations
-  const { data: registrations } = await supabase
-    .from('registrations')
-    .select('*, events(*)')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(3)
-  
-  // Get students
-  const { data: students } = await supabase
-    .from('students')
-    .select('*')
-    .eq('family_id', family?.id)
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) return null
+    
+    // Get user's family
+    const { data: family, error: familyError } = await supabase
+      .from('families')
+      .select('*')
+      .or(`primary_user_id.eq.${user.id},secondary_user_id.eq.${user.id}`)
+      .single()
+    
+    if (familyError) {
+      console.error('Family query error:', { errorCode: familyError.code, message: familyError.message })
+      throw new Error('Failed to load family data')
+    }
+    
+    // Get recent invoices
+    const { data: invoices, error: invoicesError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('family_id', family?.id)
+      .order('created_at', { ascending: false })
+      .limit(3)
+    
+    if (invoicesError) {
+      console.error('Invoices query error:', { errorCode: invoicesError.code, message: invoicesError.message })
+    }
+    
+    // Get recent registrations
+    const { data: registrations, error: registrationsError } = await supabase
+      .from('registrations')
+      .select('*, events(*)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(3)
+    
+    if (registrationsError) {
+      console.error('Registrations query error:', { errorCode: registrationsError.code, message: registrationsError.message })
+    }
+    
+    // Get students
+    const { data: students, error: studentsError } = await supabase
+      .from('students')
+      .select('*')
+      .eq('family_id', family?.id)
+    
+    if (studentsError) {
+      console.error('Students query error:', { errorCode: studentsError.code, message: studentsError.message })
+    }
 
   return (
     <div>
@@ -151,4 +169,8 @@ export default async function PortalDashboard() {
       </div>
     </div>
   )
+  } catch (error: any) {
+    console.error('Dashboard error:', { message: error?.message || 'Unknown error' })
+    return <div>Error loading dashboard</div>
+  }
 }

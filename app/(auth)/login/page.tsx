@@ -19,14 +19,32 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) throw error
 
-      router.push('/portal/dashboard')
+      // Get user role to determine redirect
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (userError) {
+        console.error('User role query error:', userError)
+        router.push('/portal/dashboard')
+      } else {
+        // Redirect based on role
+        if (userData.role === 'admin' || userData.role === 'staff') {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/portal/dashboard')
+        }
+      }
+      
       router.refresh()
     } catch (err: any) {
       setError(err.message || 'Failed to login')

@@ -15,7 +15,8 @@
 import { createClient } from '@supabase/supabase-js'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import fetch from 'node-fetch'
+// Use built-in fetch in Node 18+
+const fetch = globalThis.fetch || require('node-fetch')
 
 // Configuration
 const WORDPRESS_URL = process.env.WORDPRESS_URL || 'https://old-site.com'

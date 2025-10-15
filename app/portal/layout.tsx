@@ -7,12 +7,18 @@ export default async function PortalLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    redirect('/login')
-  }
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error) {
+      console.error('Auth error:', { errorCode: error.message })
+      redirect('/login')
+    }
+    
+    if (!user) {
+      redirect('/login')
+    }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,4 +76,8 @@ export default async function PortalLayout({
       </div>
     </div>
   )
+  } catch (error: any) {
+    console.error('Portal layout error:', { message: error?.message || 'Unknown error' })
+    redirect('/login')
+  }
 }

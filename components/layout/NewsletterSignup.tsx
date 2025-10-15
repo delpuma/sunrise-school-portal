@@ -30,7 +30,8 @@ export default function NewsletterSignup() {
       setMessage(data.message)
       setEmail('')
     } catch (err: any) {
-      setError(err.message)
+      console.error('Newsletter signup error:', { message: err?.message || 'Unknown error' })
+      setError(err.message || 'Failed to subscribe')
     } finally {
       setLoading(false)
     }

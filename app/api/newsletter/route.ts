@@ -2,16 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
+    
+    const body = await request.json()
+    const { email } = body
+    
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
+    }
   
-  const body = await request.json()
-  const { email } = body
-  
-  if (!email) {
-    return NextResponse.json({ error: 'Email is required' }, { status: 400 })
-  }
-  
-  // Check if already subscribed
+    // Check if already subscribed
   const { data: existing } = await supabase
     .from('newsletter_signups')
     .select('*')
@@ -30,7 +37,8 @@ export async function POST(request: NextRequest) {
         .eq('email', email)
       
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('Newsletter resubscribe error:', { errorCode: error.code, message: error.message })
+        return NextResponse.json({ error: 'Failed to resubscribe' }, { status: 500 })
       }
       
       return NextResponse.json({ message: 'Resubscribed successfully' })
@@ -49,8 +57,13 @@ export async function POST(request: NextRequest) {
     })
   
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Newsletter signup error:', { errorCode: error.code, message: error.message })
+    return NextResponse.json({ error: 'Failed to subscribe' }, { status: 500 })
   }
   
   return NextResponse.json({ message: 'Subscribed successfully' }, { status: 201 })
+  } catch (error: any) {
+    console.error('Newsletter API error:', { message: error?.message || 'Unknown error' })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

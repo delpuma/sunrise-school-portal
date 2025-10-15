@@ -2,24 +2,35 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
 export default async function InvoicesPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) return null
-  
-  // Get user's family
-  const { data: family } = await supabase
-    .from('families')
-    .select('*')
-    .or(`primary_user_id.eq.${user.id},secondary_user_id.eq.${user.id}`)
-    .single()
-  
-  // Get all invoices
-  const { data: invoices } = await supabase
-    .from('invoices')
-    .select('*')
-    .eq('family_id', family?.id)
-    .order('due_at', { ascending: false })
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) return null
+    
+    // Get user's family
+    const { data: family, error: familyError } = await supabase
+      .from('families')
+      .select('*')
+      .or(`primary_user_id.eq.${user.id},secondary_user_id.eq.${user.id}`)
+      .single()
+    
+    if (familyError) {
+      console.error('Family query error:', { errorCode: familyError.code, message: familyError.message })
+      return <div>Error loading family data</div>
+    }
+    
+    // Get all invoices
+    const { data: invoices, error: invoicesError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('family_id', family?.id)
+      .order('due_at', { ascending: false })
+    
+    if (invoicesError) {
+      console.error('Invoices query error:', { errorCode: invoicesError.code, message: invoicesError.message })
+      return <div>Error loading invoices</div>
+    }
 
   return (
     <div>
@@ -103,4 +114,8 @@ export default async function InvoicesPage() {
       )}
     </div>
   )
+  } catch (error) {
+    console.error('Invoices page error:', error)
+    return <div>Error loading invoices</div>
+  }
 }

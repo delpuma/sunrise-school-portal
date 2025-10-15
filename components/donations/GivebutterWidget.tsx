@@ -11,21 +11,32 @@ export default function GivebutterWidget({ campaignId }: { campaignId?: string }
     document.body.appendChild(script)
 
     return () => {
-      document.body.removeChild(script)
+      try {
+        if (document.body.contains(script)) {
+          document.body.removeChild(script)
+        }
+      } catch (error) {
+        console.error('Error removing Givebutter script:', error)
+      }
     }
   }, [])
 
   const handleDonate = () => {
-    // Open Givebutter widget
-    if (typeof window !== 'undefined' && (window as any).Givebutter) {
-      (window as any).Givebutter.open()
+    try {
+      if (typeof window !== 'undefined' && (window as any).Givebutter) {
+        (window as any).Givebutter.open()
+      }
+    } catch (error) {
+      console.error('Error opening Givebutter widget:', error)
     }
   }
 
+  const sanitizedCampaignId = campaignId?.replace(/[^a-zA-Z0-9-_]/g, '')
+
   return (
     <>
-      {campaignId && (
-        <givebutter-widget campaign-id={campaignId}></givebutter-widget>
+      {sanitizedCampaignId && (
+        <div dangerouslySetInnerHTML={{ __html: `<givebutter-widget campaign-id="${sanitizedCampaignId}"></givebutter-widget>` }} />
       )}
       <button
         onClick={handleDonate}

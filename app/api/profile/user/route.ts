@@ -18,7 +18,8 @@ export async function PUT(request: NextRequest) {
     .eq('id', user.id)
   
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('User update error:', { errorCode: error.code, message: error.message });
+    return NextResponse.json({ error: 'Failed to update user profile' }, { status: 500 })
   }
   
   // Create audit log

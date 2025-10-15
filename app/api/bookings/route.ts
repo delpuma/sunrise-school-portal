@@ -37,15 +37,21 @@ export async function POST(request: NextRequest) {
       .single()
     
     if (error) {
-      throw new Error(error.message)
+      console.error('Booking creation error:', { errorCode: error.code, message: error.message })
+      throw new Error('Failed to create booking')
     }
     
     // Track CRM interaction
-    await updateContactFromBooking(email, name, phone)
-    await trackInteraction(email, 'tour_booking', {
-      booking_id: booking.id,
-      date: startAt.toISOString(),
-    })
+    try {
+      await updateContactFromBooking(email, name, phone)
+      await trackInteraction(email, 'tour_booking', {
+        booking_id: booking.id,
+        date: startAt.toISOString(),
+      })
+    } catch (crmError: any) {
+      console.error('CRM tracking error:', { message: crmError?.message || 'Unknown error' })
+      // Don't fail the booking if CRM tracking fails
+    }
     
     // TODO: Create Google Calendar event if configured
     // const googleCalendarId = process.env.GOOGLE_CALENDAR_ID
@@ -55,9 +61,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(booking, { status: 201 })
   } catch (error: any) {
-    console.error('Booking error:', error)
+    console.error('Booking error:', { message: error?.message || 'Unknown error' })
     return NextResponse.json(
-      { error: error.message || 'Failed to create booking' },
+      { error: 'Failed to create booking' },
       { status: 500 }
     )
   }

@@ -7,22 +7,28 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    redirect('/login')
-  }
-  
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  
-  if (!userData || !['admin', 'staff'].includes(userData.role)) {
-    redirect('/')
-  }
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      redirect('/login')
+    }
+    
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    
+    if (error) {
+      console.error('User role query error:', { errorCode: error.code, message: error.message })
+      throw new Error('Failed to verify user role')
+    }
+    
+    if (!userData || !['admin', 'staff'].includes(userData.role)) {
+      redirect('/')
+    }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,4 +126,8 @@ export default async function AdminLayout({
       </div>
     </div>
   )
+  } catch (error: any) {
+    console.error('Admin layout error:', { message: error?.message || 'Unknown error' })
+    redirect('/login')
+  }
 }

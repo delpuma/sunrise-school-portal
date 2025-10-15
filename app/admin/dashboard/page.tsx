@@ -2,45 +2,54 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
 export default async function AdminDashboard() {
-  const supabase = await createClient()
-  
-  // Get unpaid invoices count
-  const { count: unpaidInvoices } = await supabase
-    .from('invoices')
-    .select('*', { count: 'exact', head: true })
-    .neq('status', 'paid')
-  
-  // Get events near capacity
-  const { data: events } = await supabase
-    .from('events')
-    .select('*, registrations(qty)')
-    .eq('is_published', true)
-    .gte('start_at', new Date().toISOString())
-    .order('start_at', { ascending: true })
-    .limit(5)
-  
-  const capacityAlerts = events?.filter(event => {
-    if (!event.capacity) return false
-    const registered = event.registrations?.reduce((sum: number, r: any) => sum + r.qty, 0) || 0
-    return registered >= event.capacity * 0.8
-  })
-  
-  // Get upcoming tours
-  const { data: tours } = await supabase
-    .from('bookings')
-    .select('*')
-    .gte('start_at', new Date().toISOString())
-    .order('start_at', { ascending: true })
-    .limit(5)
-  
-  // Get recent donations
-  const { data: donations } = await supabase
-    .from('donations')
-    .select('*')
-    .order('occurred_at', { ascending: false })
-    .limit(5)
-  
-  const totalDonations = donations?.reduce((sum, d) => sum + d.amount_cents, 0) || 0
+  try {
+    const supabase = await createClient()
+    
+    // Get unpaid invoices count
+    const { count: unpaidInvoices, error: invoicesError } = await supabase
+      .from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .neq('status', 'paid')
+    
+    if (invoicesError) {
+      console.error('Invoices count error:', { errorCode: invoicesError.code, message: invoicesError.message })
+    }
+    
+    // Get events near capacity
+    const { data: events, error: eventsError } = await supabase
+      .from('events')
+      .select('*, registrations(qty)')
+      .eq('is_published', true)
+      .gte('start_at', new Date().toISOString())
+      .order('start_at', { ascending: true })
+      .limit(5)
+    
+    if (eventsError) {
+      console.error('Events query error:', { errorCode: eventsError.code, message: eventsError.message })
+    }
+    
+    const capacityAlerts = events?.filter(event => {
+      if (!event.capacity) return false
+      const registered = event.registrations?.reduce((sum: number, r: any) => sum + r.qty, 0) || 0
+      return registered >= event.capacity * 0.8
+    })
+    
+    // Get upcoming tours
+    const { data: tours } = await supabase
+      .from('bookings')
+      .select('*')
+      .gte('start_at', new Date().toISOString())
+      .order('start_at', { ascending: true })
+      .limit(5)
+    
+    // Get recent donations
+    const { data: donations } = await supabase
+      .from('donations')
+      .select('*')
+      .order('occurred_at', { ascending: false })
+      .limit(5)
+    
+    const totalDonations = donations?.reduce((sum, d) => sum + d.amount_cents, 0) || 0
 
   return (
     <div>
@@ -169,4 +178,8 @@ export default async function AdminDashboard() {
       </div>
     </div>
   )
+  } catch (error: any) {
+    console.error('Admin dashboard error:', { message: error?.message || 'Unknown error' })
+    return <div>Error loading dashboard</div>
+  }
 }

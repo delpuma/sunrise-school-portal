@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
   
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Forms query error:', { errorCode: error.code, message: error.message })
+    return NextResponse.json({ error: 'Failed to fetch forms' }, { status: 500 })
   }
   
   return NextResponse.json({ forms })
@@ -79,7 +80,8 @@ export async function POST(request: NextRequest) {
       .single()
     
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Form creation error:', { errorCode: error.code, message: error.message })
+      return NextResponse.json({ error: 'Failed to create form' }, { status: 500 })
     }
     
     return NextResponse.json({ form })
@@ -87,6 +89,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Form API error:', { message: error?.message || 'Unknown error' })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -30,9 +30,13 @@ export function rateLimit(
 // Cleanup old entries periodically
 setInterval(() => {
   const now = Date.now()
-  for (const [key, value] of rateLimitMap.entries()) {
+  const keysToDelete: string[] = []
+  
+  rateLimitMap.forEach((value, key) => {
     if (now > value.resetTime) {
-      rateLimitMap.delete(key)
+      keysToDelete.push(key)
     }
-  }
+  })
+  
+  keysToDelete.forEach(key => rateLimitMap.delete(key))
 }, 60000)

@@ -18,7 +18,7 @@ export default async function ResourcesPage() {
     }
     acc[resource.category].push(resource)
     return acc
-  }, {} as Record<string, typeof resources>)
+  }, {} as Record<string, any[]>)
 
   return (
     <div>
@@ -30,7 +30,7 @@ export default async function ResourcesPage() {
             <div key={category}>
               <h2 className="text-2xl font-semibold mb-4 text-gray-900">{category}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {items.map((resource) => (
+                {(items as any[]).map((resource: any) => (
                   <a
                     key={resource.id}
                     href={resource.file_url}
